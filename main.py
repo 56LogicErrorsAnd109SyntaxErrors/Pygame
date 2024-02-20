@@ -786,7 +786,7 @@ class Game:
         pygame.draw.rect(window, (255, 255, 255), pygame.Rect(285, 540, 150, 50), 5)
         pygame.draw.rect(window, (255, 255, 255), pygame.Rect(710 , 140, 150, 50), 5)
         pygame.draw.rect(window, (255, 255, 255), pygame.Rect(710 , 240, 150, 50), 5)
-
+        pygame.draw.rect(window, (255, 255, 255), pygame.Rect(35, 40, 110, 50), 5)
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
@@ -822,6 +822,11 @@ class Game:
         font.set_bold(False)
         img = font.render('right click', True, (255, 255, 255))
         window.blit(img, (740, 255))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 40)
+        font.set_bold(False)
+        img = font.render('back', True, (255, 255, 255))
+        window.blit(img, (50, 50))
         pygame.display.update()
     def handle_event_start_menu(self):
         events = pygame.event.get()
@@ -840,6 +845,10 @@ class Game:
             if event.type == pygame.QUIT:
                 self.changing_controls = False
                 self.running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                cursor_pos = list(pygame.mouse.get_pos())
+                if cursor_pos[0] > 30 and cursor_pos[1] > 35 and cursor_pos[0] < 140 and cursor_pos[1] < 85:
+                    self.changing_controls = False
             
     def handle_event_main_game(self):
         events = pygame.event.get()
