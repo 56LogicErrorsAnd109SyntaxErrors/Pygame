@@ -17,7 +17,12 @@ TETRIS_NOTATION = ['T', 'S', 'Z', 'L', 'J', 'I', 'O']
 TETRIMINO_COLOR = {'T' : (221, 10, 178), 'S' : (83, 218, 63), 'Z' : (253, 63, 89), 'L' : (255, 145, 12), 'J' : (0, 119, 211), 'I' : (1, 237, 250), 'O' : (254, 251, 52)}
 BOARDSIZE = 200
 MINES = 31
-
+PYGAME_TO_KEYS = {pygame.K_0 : '0', pygame.K_1 : '1', pygame.K_2 : '2', pygame.K_2 : '3', pygame.K_3 : '3', pygame.K_4 : '4', pygame.K_5 : '5', pygame.K_6 : '6', pygame.K_7 : '7', pygame.K_8 : '8', pygame.K_9 : '9',
+                  pygame.K_a : 'A', pygame.K_b : 'B', pygame.K_c : 'C', pygame.K_d : 'D', pygame.K_e : 'E', pygame.K_f : 'F', pygame.K_g : 'G', pygame.K_h : 'H', pygame.K_i : 'I', pygame.K_j : 'J', pygame.K_k : 'K',
+                  pygame.K_l : 'L', pygame.K_m : 'M', pygame.K_n : 'N', pygame.K_o : 'O', pygame.K_p : 'P', pygame.K_q : 'Q', pygame.K_r : 'R', pygame.K_s : 'S', pygame.K_t : 'T', pygame.K_u : 'U', pygame.K_v : 'V',
+                  pygame.K_w : 'W', pygame.K_x : 'X', pygame.K_y : 'Y', pygame.K_z : 'Z',
+                  pygame.K_LEFT : 'arrow left', pygame.K_RIGHT : 'arrow right', pygame.K_DOWN : 'arrow down', pygame.K_UP : 'arrow up', pygame.K_SPACE : 'space',
+                  pygame.K_LSHIFT : 'left shift', pygame.K_RSHIFT : 'right shift', pygame.K_TAB : 'tab', pygame.K_LALT : 'left alt', pygame.K_RALT : 'right alit', pygame.K_RETURN : 'enter'}
 class TetrisBoard:
     def __init__(self) -> None:
         self.board = []
@@ -32,7 +37,7 @@ class TetrisBoard:
                                     'Z' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 480, 'Y' : 80}],
                                     'L' : [{'X' : 450, 'Y' : 80}, {'X' : 480, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 80}],
                                     'J' : [{'X' : 450, 'Y' : 80}, {'X' : 420, 'Y' : 80}, {'X' : 420, 'Y' : 50}, {'X' : 480, 'Y' : 80}],
-                                    'I' : [{'X' : 390, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 480, 'Y' : 50}, [None, [0, 1], None, None, None, [1, 1], None, None, None, [2, 1], None, None, None, [3, 1], None, None]],
+                                    'I' : [{'X' : 390, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 480, 'Y' : 50}, [None, None, None, None, [0, 1], [1, 1], [2, 1], [3, 1], None, None, None, None, None, None, None, None]],
                                     'O' : [{'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 450, 'Y' : 80}]}
         
         self.lines_cleared = 0
@@ -170,7 +175,7 @@ class TetrisBoard:
                 #Invert x and y coordinates
                 for i in range(len(original_orientation)):
                     if original_orientation[i] != None:
-                        new_orientation[(original_orientation[i][0] * 4) + original_orientation[i][1]] = [original_orientation[i][1], original_orientation[i][0]]
+                        new_orientation[(original_orientation[i][1] * 4) + original_orientation[i][0]] = [original_orientation[i][1], original_orientation[i][0]]
                 final_orientation = [None, None, None, None,
                                     None, None, None, None,
                                     None, None, None, None,
@@ -178,9 +183,9 @@ class TetrisBoard:
                 # Mirror along y-axis
                 for i in range(len(new_orientation)):
                     if new_orientation[i] != None:
-                        mirrored_x = 3 - new_orientation[i][1]
-                        mirrored_y = new_orientation[i][0]
-                        final_orientation[(mirrored_x * 4) + mirrored_y] = [mirrored_y, mirrored_x]
+                        mirrored_x = 3 - new_orientation[i][0]
+                        mirrored_y = new_orientation[i][1]
+                        final_orientation[(mirrored_y * 4) + mirrored_x] = [mirrored_x, mirrored_y]
                 #Shift I piece at border
                 x_shift = 0
                 y_shift = 0
@@ -220,9 +225,9 @@ class TetrisBoard:
                 #Mirror along y-axis
                 for i in range(len(original_orientation)):
                     if original_orientation[i] != None:
-                        mirrored_x = 3 - original_orientation[i][1]
-                        mirrored_y = original_orientation[i][0]
-                        new_orientation[(mirrored_x * 4) + mirrored_y] = [mirrored_y, mirrored_x]
+                        mirrored_x = 3 - original_orientation[i][0]
+                        mirrored_y = original_orientation[i][1]
+                        new_orientation[(mirrored_y * 4) + mirrored_x] = [mirrored_x, mirrored_y]
 
                 final_orientation = [None, None, None, None,
                                     None, None, None, None,
@@ -231,7 +236,7 @@ class TetrisBoard:
                 #Invert x and y coordiantes
                 for i in range(len(new_orientation)):
                     if new_orientation[i] != None:
-                        final_orientation[(new_orientation[i][0] * 4) + new_orientation[i][1]] = [new_orientation[i][1], new_orientation[i][0]]
+                        final_orientation[(new_orientation[i][1] * 4) + new_orientation[i][0]] = [new_orientation[i][1], new_orientation[i][0]]
                 #Shift piece at border
                 x_shift = 0
                 y_shift = 0
@@ -276,7 +281,7 @@ class TetrisBoard:
                 corr_x = int((x - mid_x + 30) / 30)
                 y = self.tetrimino_position[self.current_piece][i]['Y']
                 corr_y = int((y - mid_y + 30) / 30)
-                original_orientation[corr_y + (corr_x * 3)] = [corr_y, corr_x]
+                original_orientation[corr_x + (corr_y * 3)] = [corr_x, corr_y]
             if direction == 'clockwise':
                 #Invert the x and y coordinates
                 new_orientation = [None, None, None,
@@ -284,17 +289,75 @@ class TetrisBoard:
                                 None, None, None]
                 for i in range(len(original_orientation)):
                     if original_orientation[i] != None:
-                        new_orientation[(original_orientation[i][0] * 3) + original_orientation[i][1]] = [original_orientation[i][1], original_orientation[i][0]]
-
+                        inverted_x = original_orientation[i][1]
+                        inverted_y = original_orientation[i][0]
+                        new_orientation[(inverted_y * 3) + inverted_x] = [inverted_x, inverted_y]
                 #Mirror along y-axis
                 final_orientation = [None, None, None,
                                     None, None, None,
                                     None, None, None]
                 for i in range(len(new_orientation)):
                     if new_orientation[i] != None:
-                        mirrored_x = 2 - new_orientation[i][1]
-                        mirrored_y = new_orientation[i][0]
-                        final_orientation[(mirrored_x * 3) + mirrored_y] = [mirrored_y, mirrored_x]
+                        mirrored_x = 2 - new_orientation[i][0]
+                        mirrored_y = new_orientation[i][1]
+                        final_orientation[(mirrored_y * 3) + mirrored_x] = [mirrored_x, mirrored_y]
+                #Shift piece at border
+                x_shift = 0
+                y_shift = 0
+                for i in range(len(final_orientation)):
+                    if final_orientation[i] != None:
+                        temp_x = mid_x + final_orientation[i][0] * 30 - 30
+                        temp_y = mid_y + final_orientation[i][1] * 30 - 30
+                        if temp_x > 570:
+                            x_shift -= 1
+                        elif temp_x < 300:
+                            x_shift += 1
+                        if temp_y > 620:
+                            y_shift -= 1
+                        elif temp_y < 50:
+                            y_shift += 1
+
+                #Check if rotation is possible
+                for i in range(len(final_orientation)):
+                    if final_orientation[i] == [1, 1]:
+                        continue
+                    if final_orientation[i] != None:
+                        temp_x = mid_x + final_orientation[i][0] * 30 - 30 + x_shift * 30
+                        temp_y = mid_y + final_orientation[i][1] * 30 - 30 + y_shift * 30
+                        row_num = int((temp_y - 50) / 30)
+                        column_num = int((temp_x - 300) / 30)
+                        if self.board[row_num * 10 + column_num]['block'] != None:
+                            return
+                #Update terimino position
+                index = 1
+                for i in range(len(final_orientation)):
+                    if final_orientation[i] == [1, 1]:
+                        self.tetrimino_position[self.current_piece][0]['X'] += x_shift * 30
+                        self.tetrimino_position[self.current_piece][0]['Y'] += y_shift * 30
+                        continue
+                    if final_orientation[i] != None:
+                        self.tetrimino_position[self.current_piece][index]['X'] = mid_x + final_orientation[i][0] * 30 - 30 + x_shift * 30
+                        self.tetrimino_position[self.current_piece][index]['Y'] = mid_y + final_orientation[i][1] * 30 - 30 + y_shift * 30
+                        index += 1
+            elif direction == 'anti-clockwise':
+                new_orientation = [None, None, None,
+                                None, None, None,
+                                None, None, None]
+                #Mirror along y-axis
+                for i in range(len(original_orientation)):
+                    if original_orientation[i] != None:
+                        mirrored_x = 2 - original_orientation[i][0]
+                        mirrored_y = original_orientation[i][1]
+                        new_orientation[(mirrored_y * 3) + mirrored_x] = [mirrored_x, mirrored_y]
+                #Invert the x and y coordinates
+                final_orientation = [None, None, None,
+                                    None, None, None,
+                                    None, None, None]
+                for i in range(len(new_orientation)):
+                    if new_orientation[i] != None:
+                        inverted_x = new_orientation[i][1]
+                        inverted_y = new_orientation[i][0]
+                        final_orientation[(inverted_y * 3) + inverted_x] = [inverted_x, inverted_y]
                 #Shift piece at border
                 x_shift = 0
                 y_shift = 0
@@ -329,62 +392,8 @@ class TetrisBoard:
                         self.tetrimino_position[self.current_piece][0]['Y'] += y_shift * 30
                         continue
                     if final_orientation[i] != None:
-                        self.tetrimino_position[self.current_piece][index]['X'] = mid_x + final_orientation[i][1] * 30 - 30 + x_shift * 30
-                        self.tetrimino_position[self.current_piece][index]['Y'] = mid_y + final_orientation[i][0] * 30 - 30 + y_shift * 30
-                        index += 1
-            elif direction == 'anti-clockwise':
-                new_orientation = [None, None, None,
-                                None, None, None,
-                                None, None, None]
-                #Mirror along y-axis
-                for i in range(len(original_orientation)):
-                    if original_orientation[i] != None:
-                        mirrored_x = 2 - original_orientation[i][1]
-                        mirrored_y = original_orientation[i][0]
-                        new_orientation[(mirrored_x * 3) + mirrored_y] = [mirrored_y, mirrored_x]
-                #Invert the x and y coordinates
-                final_orientation = [None, None, None,
-                                    None, None, None,
-                                    None, None, None]
-                for i in range(len(new_orientation)):
-                    if new_orientation[i] != None:
-                        final_orientation[(new_orientation[i][0] * 3) + new_orientation[i][1]] = [new_orientation[i][1], new_orientation[i][0]]
-                #Shift piece at border
-                x_shift = 0
-                y_shift = 0
-                for i in range(len(final_orientation)):
-                    if final_orientation[i] != None:
-                        temp_x = mid_x + final_orientation[i][0] * 30 - 30
-                        temp_y = mid_y + final_orientation[i][1] * 30 - 30
-                        if temp_x > 570:
-                            x_shift -= 1
-                        elif temp_x < 300:
-                            x_shift += 1
-                        if temp_y > 620:
-                            y_shift -= 1
-                        elif temp_y < 50:
-                            y_shift += 1
-                #Check if rotation is possible
-                for i in range(len(final_orientation)):
-                    if final_orientation[i] == [1, 1]:
-                        continue
-                    if final_orientation[i] != None:
-                        temp_x = mid_x + final_orientation[i][1] * 30 - 30 + x_shift * 30
-                        temp_y = mid_y + final_orientation[i][0] * 30 - 30 + y_shift * 30
-                        row_num = int((temp_y - 50) / 30)
-                        column_num = int((temp_x - 300) / 30)
-                        if self.board[row_num * 10 + column_num]['block'] != None:
-                            return
-                #Update terimino position
-                index = 1
-                for i in range(len(final_orientation)):
-                    if final_orientation[i] == [1, 1]:
-                        self.tetrimino_position[self.current_piece][0]['X'] += x_shift * 30
-                        self.tetrimino_position[self.current_piece][0]['Y'] += y_shift * 30
-                        continue
-                    if final_orientation[i] != None:
-                        self.tetrimino_position[self.current_piece][index]['X'] = mid_x + final_orientation[i][1] * 30 - 30 + x_shift * 30
-                        self.tetrimino_position[self.current_piece][index]['Y'] = mid_y + final_orientation[i][0] * 30 - 30 + y_shift * 30
+                        self.tetrimino_position[self.current_piece][index]['X'] = mid_x + final_orientation[i][0] * 30 - 30 + x_shift * 30
+                        self.tetrimino_position[self.current_piece][index]['Y'] = mid_y + final_orientation[i][1] * 30 - 30 + y_shift * 30
                         index += 1
     
     def clear_line(self):
@@ -570,15 +579,28 @@ class Game:
     def __init__(self) -> None:
         self.running = True
         self.started = False
+        self.in_control_menu = False
         self.changing_controls = False
         self.tetris_board = TetrisBoard()
         self.minesweeper_board = MinesweeperBoard()
+        #Controls
+        self.left = pygame.K_LEFT
+        self.left_text = PYGAME_TO_KEYS[self.left]
+        self.right = pygame.K_RIGHT
+        self.right_text = PYGAME_TO_KEYS[self.right]
+        self.down = pygame.K_DOWN
+        self.down_text = PYGAME_TO_KEYS[self.down]
+        self.rotate_clockwise = pygame.K_a
+        self.rotate_clockwise_text = PYGAME_TO_KEYS[self.rotate_clockwise]
+        self.rotate_anticlockwise = pygame.K_d
+        self.rotate_anticlockwise_text = PYGAME_TO_KEYS[self.rotate_anticlockwise]
+
         #Movement
         self.move_cooldown = 0
         self.moving = False
-        self.left = False
-        self.right = False
-        self.down = False
+        self.moving_left = False
+        self.moving_right = False
+        self.moving_down = False
         #List follows [left, down, right]
         self.direction = ['left', 'down', 'right']
         self.priority = [0, 0, 0]
@@ -762,7 +784,7 @@ class Game:
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 40)
         font.set_bold(False)
-        img = font.render('rotate  reft', True, (255, 255, 255))
+        img = font.render('rotate  left', True, (255, 255, 255))
         window.blit(img, (25, 450))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 40)
@@ -788,45 +810,46 @@ class Game:
         pygame.draw.rect(window, (255, 255, 255), pygame.Rect(710 , 240, 150, 50), 5)
         pygame.draw.rect(window, (255, 255, 255), pygame.Rect(35, 40, 110, 50), 5)
 
+        box_width = 150
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
-        img = font.render('arrow left', True, (255, 255, 255))
-        window.blit(img, (310, 155))
+        img = font.render(self.left_text, True, (255, 255, 255))
+        window.blit(img, (285 + box_width // 2 - img.get_width() // 2, 155))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
-        img = font.render('arrow right', True, (255, 255, 255))
-        window.blit(img, (310, 255))
+        img = font.render(self.right_text, True, (255, 255, 255))
+        window.blit(img, (285 + box_width // 2 - img.get_width() // 2, 255))
         
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
-        img = font.render('arrow down', True, (255, 255, 255))
-        window.blit(img, (310, 355))
+        img = font.render(self.down_text, True, (255, 255, 255))
+        window.blit(img, (285 + box_width // 2 - img.get_width() // 2, 355))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
-        img = font.render('A', True, (255, 255, 255))
-        window.blit(img, (355, 455))
+        img = font.render(self.rotate_clockwise_text, True, (255, 255, 255))
+        window.blit(img, (285 + box_width // 2 - img.get_width() // 2, 455))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
-        img = font.render('D', True, (255, 255, 255))
-        window.blit(img, (355, 555))
+        img = font.render(self.rotate_anticlockwise_text, True, (255, 255, 255))
+        window.blit(img, (285 + box_width // 2 - img.get_width() // 2, 555))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
         img = font.render('left click', True, (255, 255, 255))
-        window.blit(img, (740, 155))
+        window.blit(img, (710 + box_width // 2 - img.get_width() // 2, 155))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 20)
         font.set_bold(False)
         img = font.render('right click', True, (255, 255, 255))
-        window.blit(img, (740, 255))
+        window.blit(img, (710 + box_width // 2 - img.get_width() // 2, 255))
 
         font = pygame.font.Font(('HunDIN1451.ttf'), 40)
         font.set_bold(False)
         img = font.render('back', True, (255, 255, 255))
-        window.blit(img, (50, 50))
+        window.blit(img, (35 + 110 // 2 - img.get_width() // 2, 50))
         pygame.display.update()
     def handle_event_start_menu(self):
         events = pygame.event.get()
@@ -838,18 +861,27 @@ class Game:
                 if cursor_pos[0] > 260 and cursor_pos[1] > 260 and cursor_pos[0] < 640 and cursor_pos[1] < 350:
                     self.started = True
                 if cursor_pos[0] > 260 and cursor_pos[1] > 390 and cursor_pos[0] < 640 and cursor_pos[1] < 770:
-                    self.changing_controls = True
+                    self.in_control_menu = True
     def handle_event_control_menu(self):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
-                self.changing_controls = False
+                self.in_control_menu = False
                 self.running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 cursor_pos = list(pygame.mouse.get_pos())
                 if cursor_pos[0] > 30 and cursor_pos[1] > 35 and cursor_pos[0] < 140 and cursor_pos[1] < 85:
-                    self.changing_controls = False
-            
+                    self.in_control_menu = False
+                if cursor_pos[0] > 280 and cursor_pos[1] > 135 and cursor_pos[0] < 330 and cursor_pos[1] < 185:
+                    self.changing_controls = True
+                if cursor_pos[0] > 280 and cursor_pos[1] > 235 and cursor_pos[0] < 330 and cursor_pos[1] < 285:
+                    self.changing_controls = True
+                if cursor_pos[0] > 280 and cursor_pos[1] > 335 and cursor_pos[0] < 330 and cursor_pos[1] < 385:
+                    self.changing_controls = True
+                if cursor_pos[0] > 280 and cursor_pos[1] > 435 and cursor_pos[0] < 330 and cursor_pos[1] < 485:
+                    self.changing_controls = True
+                if cursor_pos[0] > 280 and cursor_pos[1] > 535 and cursor_pos[0] < 330 and cursor_pos[1] < 585:
+                    self.changing_controls = True
     def handle_event_main_game(self):
         events = pygame.event.get()
         for event in events:
@@ -857,29 +889,29 @@ class Game:
                 self.running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    if self.moving and self.left:
+                    if self.moving and self.moving_left:
                         continue
                     self.moving = True
                     self.move_cooldown = 0
-                    self.left = True
+                    self.moving_left = True
                     if self.priority == [0, 0, 0]:
                         self.priority[0] = 1
                     else:
                         self.priority[0] = max(self.priority) + 1
                 if event.key == pygame.K_RIGHT:
-                    if self.moving and self.right:
+                    if self.moving and self.moving_right:
                         continue
                     self.moving = True
                     self.move_cooldown = 0
-                    self.right = True
+                    self.moving_right = True
                     if self.priority == [0, 0, 0]:
                         self.priority[2] = 1
                     else:
                         self.priority[2] = max(self.priority) + 1
                 if event.key == pygame.K_DOWN:
-                    if self.moving and self.down:
+                    if self.moving and self.moving_down:
                         continue
-                    self.down = True
+                    self.moving_down = True
                     self.moving = True
                     self.move_cooldown = 0
                     if self.priority == [0, 0, 0]:
@@ -899,14 +931,14 @@ class Game:
                             self.priority[0] -= 1
                         if self.priority[2] > self.priority[1]:
                             self.priority[2] -= 1
-                        self.down = False
+                        self.moving_down = False
                         self.priority[1] = 0
                     if event.key == pygame.K_LEFT:
                         if self.priority[1] > self.priority[0]:
                             self.priority[1] -= 1
                         if self.priority[2] > self.priority[0]:
                             self.priority[2] -= 1
-                        self.left = False
+                        self.moving_left = False
                         self.priority[0] = 0
                     if event.key == pygame.K_RIGHT:
                         if self.priority[0] > self.priority[2]:
@@ -914,7 +946,7 @@ class Game:
                         if self.priority[1] > self.priority[2]:
                             self.priority[1] -= 1
                         self.priority[2] = 0
-                        self.right = False
+                        self.moving_right = False
                     self.move_cooldown = 0
                     if self.priority == [0, 0, 0]:
                         self.moving = False
@@ -939,9 +971,9 @@ class Game:
                     #Movement
                     self.move_cooldown = 0
                     self.moving = False
-                    self.left = False
-                    self.right = False
-                    self.down = False
+                    self.moving_left = False
+                    self.moving_right = False
+                    self.moving_down = False
                     #List follows [left, down, right]
                     self.direction = ['left', 'down', 'right']
                     self.priority = [0, 0, 0]
@@ -956,7 +988,15 @@ class Game:
                     self.clock = pygame.time.Clock()
                     self.block_drop_timer = 0
                     self.dt = 0 
-    
+    def handle_event_changing_controls(self, control, control_to_text):
+        pygame_keys = pygame.key.get_pressed()
+        valid_keys = list(PYGAME_TO_KEYS.keys())
+        for key in valid_keys:
+            if pygame_keys[key]:
+                control = key
+                control_to_text = valid_keys[key]
+                self.changing_controls = False
+
     def update_cooldown(self):
         self.move_cooldown -= self.dt
 
@@ -966,9 +1006,17 @@ class Game:
                 break
             self.outline_menu()
             self.handle_event_start_menu()
-            while self.changing_controls:
+            while self.in_control_menu:
                 self.outline_controls()
                 self.handle_event_control_menu()
+                while self.changing_controls:
+                    font = pygame.font.Font(('HunDIN1451.ttf'), 20)
+                    font.set_bold(False)
+                    img = font.render('press any key', True, (255, 255, 255))
+                    window.blit(img, (screen_width // 2 - img.get_width() // 2, 455))
+                    pygame.display.update()
+                    self.handle_event_changing_controls()
+
         self.clock = pygame.time.Clock()
         window.fill((128, 128, 128))
         self.outline_board
@@ -1015,8 +1063,8 @@ class Game:
                             self.place_flag = False
                     self.clicking = False
 
-
-                self.block_drop_timer -= self.dt
+                if not self.moving_down:
+                    self.block_drop_timer -= self.dt
                 if self.block_drop_timer <= 0:
                     self.block_drop_timer = self.speed
                     if not self.tetris_board.is_stop_falling():
