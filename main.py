@@ -675,29 +675,29 @@ class Game:
         if has_won:
             text = 'VICTORY'
             image = font.render(str(text), True, (255, 255, 255))
-            window.blit(image, (450, 90))
+            window.blit(image, (450, 60))
         else:
             text = 'DEFEAT'
             image = font.render(str(text), True, (255, 255, 255))
-            window.blit(image, (470, 90))
+            window.blit(image, (470, 60))
 
         font = pygame.font.Font(('mine-sweeper.ttf'), 20)
 
         text = 'score:'
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (400, 220))
+        window.blit(image, (400, 190))
 
         text = str(self.tetris_board.score)
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (400, 270))
+        window.blit(image, (400, 240))
 
         text = 'lines Cleared:'
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (400, 320))
+        window.blit(image, (400, 290))
             
         text = str(self.tetris_board.lines_cleared)
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (400, 370))
+        window.blit(image, (400, 340))
 
         tiles_cleared = 0
         for i in range(BOARDSIZE):
@@ -706,20 +706,26 @@ class Game:
 
         text = 'tiles left:'
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (400, 420))
+        window.blit(image, (400, 390))
 
         text = str(200 - tiles_cleared)
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (400, 470))
+        window.blit(image, (400, 440))
 
-        pygame.draw.rect(window, (255,255,255), pygame.Rect(480, 560, 290, 75), 10)
+        pygame.draw.rect(window, (255,255,255), pygame.Rect(480, 510, 290, 75), 10)
         
         font = pygame.font.Font(('mine-sweeper.ttf'), 25)
-
         text = 'play again'
         image = font.render(str(text), True, (255, 255, 255))
-        window.blit(image, (500, 580))
+        window.blit(image, (500, 530))
+            
+        font = pygame.font.Font(('mine-sweeper.ttf'), 25)
+        text = 'back to main menu'
+        image = font.render(str(text), True, (255, 255, 255))
+        window.blit(image, (425, 620))
     
+        pygame.draw.rect(window, (255,255,255), pygame.Rect(400, 600, 455, 75), 10)
+
         #Display tetris board
         for i in range(BOARDSIZE):
             if self.tetris_board.board[i]['block'] != None:
@@ -860,7 +866,7 @@ class Game:
                 cursor_pos = list(pygame.mouse.get_pos())
                 if cursor_pos[0] > 260 and cursor_pos[1] > 260 and cursor_pos[0] < 640 and cursor_pos[1] < 350:
                     self.started = True
-                if cursor_pos[0] > 260 and cursor_pos[1] > 390 and cursor_pos[0] < 640 and cursor_pos[1] < 770:
+                if cursor_pos[0] > 260 and cursor_pos[1] > 390 and cursor_pos[0] < 640 and cursor_pos[1] < 470:
                     self.in_control_menu = True
 
     def handle_event_control_menu(self):
@@ -1016,7 +1022,10 @@ class Game:
                 self.running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 cursor_pos = list(pygame.mouse.get_pos())
-                if cursor_pos[0] > 480 and cursor_pos[1] > 560 and cursor_pos[0] < 770 and cursor_pos[1] < 635:
+                if cursor_pos[0] > 485 and cursor_pos[1] > 515 and cursor_pos[0] < 760 and cursor_pos[1] < 575:
+                    self.started = True
+                    self.in_control_menu = False
+                    self.changing_controls = False
                     self.tetris_board = TetrisBoard()
                     self.minesweeper_board = MinesweeperBoard()
                     #Movement
@@ -1037,7 +1046,37 @@ class Game:
                     self.place_flag = False
                     #Timer
                     self.clock = pygame.time.Clock()
-                    self.block_drop_timer = 0
+                    self.speed = self.tetris_board.speed[str(self.tetris_board.level)] * 1/24
+                    self.block_drop_timer = self.speed
+                    self.dt = 0 
+                if cursor_pos[0] > 405 and cursor_pos[1] > 605 and cursor_pos[0] < 850 and cursor_pos[1] < 670:
+                    self.started = False
+                    self.running = True
+                    self.started = False
+                    self.in_control_menu = False
+                    self.changing_controls = False
+                    self.tetris_board = TetrisBoard()
+                    self.minesweeper_board = MinesweeperBoard()
+                    #Movement
+                    self.move_cooldown = 0
+                    self.moving = False
+                    self.moving_left = False
+                    self.moving_right = False
+                    self.moving_down = False
+                    #List follows [left, down, right]
+                    self.direction = ['left', 'down', 'right']
+                    self.priority = [0, 0, 0]
+                    #Rotate
+                    self.rotating = False
+                    self.rotate_direction = None
+                    #Click
+                    self.clicking = False
+                    self.clear_tile = False
+                    self.place_flag = False
+                    #Timer
+                    self.clock = pygame.time.Clock()
+                    self.speed = self.tetris_board.speed[str(self.tetris_board.level)] * 1/24
+                    self.block_drop_timer = self.speed
                     self.dt = 0 
     def outline_changing_controls(self, control):
         window.fill((128, 128, 128))
@@ -1105,15 +1144,6 @@ class Game:
         self.move_cooldown -= self.dt
 
     def run(self):
-        while self.running:
-            if self.started:
-                break
-            self.outline_menu()
-            self.handle_event_start_menu()
-            while self.in_control_menu:
-                self.outline_controls()
-                self.handle_event_control_menu()
-
         self.clock = pygame.time.Clock()
         window.fill((128, 128, 128))
         self.outline_board
@@ -1121,88 +1151,95 @@ class Game:
         piece = self.tetris_board.current_piece
         pygame.display.update()
         while self.running:
-            if self.minesweeper_board.is_lose() or self.tetris_board.is_lose():
-                self.display_gameOver(False)
-                self.handle_event_game_over()
-            elif self.minesweeper_board.is_win():
-                self.display_gameOver(True)
-                self.handle_event_game_over()
-            else:
-                self.handle_event_main_game()
-                if self.moving:
-                    self.update_cooldown()
-                    if self.move_cooldown <= 0:
-                        direction = self.direction[self.priority.index(max(self.priority))]
-                        self.tetris_board.move(direction)
-                        self.move_cooldown = 0.2
-                if self.rotating:
-                    self.tetris_board.rotate(self.rotate_direction)
-                    self.rotate_direction = None
-                    self.rotating = False
-                if self.clicking:
-                    cursor_pos = list(pygame.mouse.get_pos())
-                    column_num = (cursor_pos[0] - 300) // 30 
-                    row_num = (cursor_pos[1] - 50) // 30 
-                    mouse_position = (column_num) + ((row_num) * 10)
-                    if cursor_pos[0] >= 300 and cursor_pos[0] <= 600 and cursor_pos[1] <= 650 and cursor_pos[1] >= 50 and self.tetris_board.board[mouse_position]['block'] == None:
-                        if not self.minesweeper_board.started:
-                            self.minesweeper_board.start_minesweeper(mouse_position)
-                            self.minesweeper_board.started = True
-                        if self.clear_tile:
-                            self.minesweeper_board.clear_empty_adjacent_tiles(mouse_position, [mouse_position])
-                            self.minesweeper_board.board[mouse_position]['discovered'] = True
-                            self.clear_tile = False
-                        if self.place_flag:
-                            if self.minesweeper_board.board[mouse_position]['has_flag'] == True:
-                                self.minesweeper_board.board[mouse_position]['has_flag'] = False
-                            else:
-                                self.minesweeper_board.board[mouse_position]['has_flag'] = True
-                            self.place_flag = False
-                    self.clicking = False
+            if not self.started:
+                self.outline_menu()
+                self.handle_event_start_menu()
+                while self.in_control_menu:
+                    self.outline_controls()
+                    self.handle_event_control_menu()
+            if self.started:
+                if self.minesweeper_board.is_lose() or self.tetris_board.is_lose():
+                    self.display_gameOver(False)
+                    self.handle_event_game_over()
+                elif self.minesweeper_board.is_win():
+                    self.display_gameOver(True)
+                    self.handle_event_game_over()
+                else:
+                    self.handle_event_main_game()
+                    if self.moving:
+                        self.update_cooldown()
+                        if self.move_cooldown <= 0:
+                            direction = self.direction[self.priority.index(max(self.priority))]
+                            self.tetris_board.move(direction)
+                            self.move_cooldown = 0.2
+                    if self.rotating:
+                        self.tetris_board.rotate(self.rotate_direction)
+                        self.rotate_direction = None
+                        self.rotating = False
+                    if self.clicking:
+                        cursor_pos = list(pygame.mouse.get_pos())
+                        column_num = (cursor_pos[0] - 300) // 30 
+                        row_num = (cursor_pos[1] - 50) // 30 
+                        mouse_position = (column_num) + ((row_num) * 10)
+                        if cursor_pos[0] >= 300 and cursor_pos[0] <= 600 and cursor_pos[1] <= 650 and cursor_pos[1] >= 50 and self.tetris_board.board[mouse_position]['block'] == None:
+                            if not self.minesweeper_board.started:
+                                self.minesweeper_board.start_minesweeper(mouse_position)
+                                self.minesweeper_board.started = True
+                            if self.clear_tile:
+                                self.minesweeper_board.clear_empty_adjacent_tiles(mouse_position, [mouse_position])
+                                self.minesweeper_board.board[mouse_position]['discovered'] = True
+                                self.clear_tile = False
+                            if self.place_flag:
+                                if self.minesweeper_board.board[mouse_position]['has_flag'] == True:
+                                    self.minesweeper_board.board[mouse_position]['has_flag'] = False
+                                else:
+                                    self.minesweeper_board.board[mouse_position]['has_flag'] = True
+                                self.place_flag = False
+                        self.clicking = False
 
-                if not self.moving_down:
-                    self.block_drop_timer -= self.dt
-                if self.block_drop_timer <= 0:
-                    self.block_drop_timer = self.speed
-                    if not self.tetris_board.is_stop_falling():
-                        for i in range(4):
-                            self.tetris_board.tetrimino_position[self.tetris_board.current_piece][i]['Y'] += 30
-                    else:
-                        for i in range(4):
-                            row_num = int((self.tetris_board.tetrimino_position[self.tetris_board.current_piece][i]['Y'] - 50) / 30)
-                            column_num = int((self.tetris_board.tetrimino_position[self.tetris_board.current_piece][i]['X'] - 300) / 30)
-                            self.tetris_board.board[row_num * 10 + column_num]['block'] = TETRIMINO_COLOR[self.tetris_board.current_piece]
-                        self.tetris_board.tetrimino_position = {'T' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 80}],
-                                                                'S' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 50}],
-                                                                'Z' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 480, 'Y' : 80}],
-                                                                'L' : [{'X' : 450, 'Y' : 80}, {'X' : 480, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 80}],
-                                                                'J' : [{'X' : 450, 'Y' : 80}, {'X' : 420, 'Y' : 80}, {'X' : 420, 'Y' : 50}, {'X' : 480, 'Y' : 80}],
-                                                                'I' : [{'X' : 390, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 480, 'Y' : 50}, [None, [0, 1], None, None, None, [1, 1], None, None, None, [2, 1], None, None, None, [3, 1], None, None]],
-                                                                'O' : [{'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 450, 'Y' : 80}]}
-                        self.tetris_board.current_piece = self.tetris_board.next_piece 
-                        self.tetris_board.next_piece = self.tetris_board.generate_next_piece()
-                        self.tetris_board.calculate_score()
-                        self.tetris_board.clear_line()
-                        if self.tetris_board.is_next_level():
-                            if self.tetris_board.level > 19:
-                                self.speed = 2 * 1/24
-                                self.block_drop_timer = self.speed
-                            if self.tetris_board.level >= 29:
-                                self.speed = 1 * 1/24
-                                self.block_drop_timer = self.speed
-                            else:
-                                self.speed = self.tetris_board.speed[str(self.tetris_board.level)] * 1/24
-                                self.block_drop_timer = self.speed
-                #Display Shit
-                window.fill((128, 128, 128))
-                self.outline_board()
-                self.minesweeper_board.draw_minesweeper_board()
-                self.tetris_board.draw_tetris_board()
-                self.tetris_board.display_next_piece()
-                self.tetris_board.display_current_piece()
-                pygame.display.update()
-                self.dt = self.clock.tick(60)/1000
+                    if not self.moving_down:
+                        self.block_drop_timer -= self.dt
+                    if self.block_drop_timer <= 0:
+                        self.block_drop_timer = self.speed
+                        if not self.tetris_board.is_stop_falling():
+                            for i in range(4):
+                                self.tetris_board.tetrimino_position[self.tetris_board.current_piece][i]['Y'] += 30
+                        else:
+                            for i in range(4):
+                                row_num = int((self.tetris_board.tetrimino_position[self.tetris_board.current_piece][i]['Y'] - 50) / 30)
+                                column_num = int((self.tetris_board.tetrimino_position[self.tetris_board.current_piece][i]['X'] - 300) / 30)
+                                self.tetris_board.board[row_num * 10 + column_num]['block'] = TETRIMINO_COLOR[self.tetris_board.current_piece]
+                            self.tetris_board.tetrimino_position = {'T' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 80}],
+                                                                    'S' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 50}],
+                                                                    'Z' : [{'X' : 450, 'Y' : 80}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 480, 'Y' : 80}],
+                                                                    'L' : [{'X' : 450, 'Y' : 80}, {'X' : 480, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 480, 'Y' : 80}],
+                                                                    'J' : [{'X' : 450, 'Y' : 80}, {'X' : 420, 'Y' : 80}, {'X' : 420, 'Y' : 50}, {'X' : 480, 'Y' : 80}],
+                                                                    'I' : [{'X' : 390, 'Y' : 50}, {'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 480, 'Y' : 50}, [None, [0, 1], None, None, None, [1, 1], None, None, None, [2, 1], None, None, None, [3, 1], None, None]],
+                                                                    'O' : [{'X' : 420, 'Y' : 50}, {'X' : 450, 'Y' : 50}, {'X' : 420, 'Y' : 80}, {'X' : 450, 'Y' : 80}]}
+                            self.tetris_board.current_piece = self.tetris_board.next_piece 
+                            self.tetris_board.next_piece = self.tetris_board.generate_next_piece()
+                            self.tetris_board.calculate_score()
+                            self.tetris_board.clear_line()
+                            if self.tetris_board.is_next_level():
+                                if self.tetris_board.level > 19:
+                                    self.speed = 2 * 1/24
+                                    self.block_drop_timer = self.speed
+                                if self.tetris_board.level >= 29:
+                                    self.speed = 1 * 1/24
+                                    self.block_drop_timer = self.speed
+                                else:
+                                    self.speed = self.tetris_board.speed[str(self.tetris_board.level)] * 1/24
+                                    self.block_drop_timer = self.speed
+                    #Display Shit
+                    window.fill((128, 128, 128))
+                    self.outline_board()
+                    self.minesweeper_board.draw_minesweeper_board()
+                    self.tetris_board.draw_tetris_board()
+                    self.tetris_board.display_next_piece()
+                    self.tetris_board.display_current_piece()
+                    pygame.display.update()
+                    self.dt = self.clock.tick(60)/1000
 
 game = Game()
 game.run()
-                
+                    
