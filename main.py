@@ -22,7 +22,7 @@ PYGAME_TO_KEYS = {pygame.K_0 : '0', pygame.K_1 : '1', pygame.K_2 : '2', pygame.K
                   pygame.K_l : 'L', pygame.K_m : 'M', pygame.K_n : 'N', pygame.K_o : 'O', pygame.K_p : 'P', pygame.K_q : 'Q', pygame.K_r : 'R', pygame.K_s : 'S', pygame.K_t : 'T', pygame.K_u : 'U', pygame.K_v : 'V',
                   pygame.K_w : 'W', pygame.K_x : 'X', pygame.K_y : 'Y', pygame.K_z : 'Z',
                   pygame.K_LEFT : 'arrow left', pygame.K_RIGHT : 'arrow right', pygame.K_DOWN : 'arrow down', pygame.K_UP : 'arrow up', pygame.K_SPACE : 'space',
-                  pygame.K_LSHIFT : 'left shift', pygame.K_RSHIFT : 'right shift', pygame.K_TAB : 'tab', pygame.K_LALT : 'left alt', pygame.K_RALT : 'right alit', pygame.K_RETURN : 'enter'}
+                  pygame.K_LSHIFT : 'left shift', pygame.K_RSHIFT : 'right shift', pygame.K_TAB : 'tab', pygame.K_LALT : 'left alt', pygame.K_RALT : 'right alt', pygame.K_RETURN : 'enter'}
 class TetrisBoard:
     def __init__(self) -> None:
         self.board = []
@@ -590,11 +590,10 @@ class Game:
         self.right_text = PYGAME_TO_KEYS[self.right]
         self.down = pygame.K_DOWN
         self.down_text = PYGAME_TO_KEYS[self.down]
-        self.rotate_clockwise = pygame.K_a
-        self.rotate_clockwise_text = PYGAME_TO_KEYS[self.rotate_clockwise]
-        self.rotate_anticlockwise = pygame.K_d
+        self.rotate_anticlockwise = pygame.K_a
         self.rotate_anticlockwise_text = PYGAME_TO_KEYS[self.rotate_anticlockwise]
-
+        self.rotate_clockwise = pygame.K_d
+        self.rotate_clockwise_text = PYGAME_TO_KEYS[self.rotate_clockwise]
         #Movement
         self.move_cooldown = 0
         self.moving = False
@@ -851,6 +850,7 @@ class Game:
         img = font.render('back', True, (255, 255, 255))
         window.blit(img, (35 + 110 // 2 - img.get_width() // 2, 50))
         pygame.display.update()
+
     def handle_event_start_menu(self):
         events = pygame.event.get()
         for event in events:
@@ -862,6 +862,7 @@ class Game:
                     self.started = True
                 if cursor_pos[0] > 260 and cursor_pos[1] > 390 and cursor_pos[0] < 640 and cursor_pos[1] < 770:
                     self.in_control_menu = True
+
     def handle_event_control_menu(self):
         events = pygame.event.get()
         for event in events:
@@ -872,23 +873,73 @@ class Game:
                 cursor_pos = list(pygame.mouse.get_pos())
                 if cursor_pos[0] > 30 and cursor_pos[1] > 35 and cursor_pos[0] < 140 and cursor_pos[1] < 85:
                     self.in_control_menu = False
-                if cursor_pos[0] > 280 and cursor_pos[1] > 135 and cursor_pos[0] < 330 and cursor_pos[1] < 185:
+                if cursor_pos[0] > 280 and cursor_pos[1] > 135 and cursor_pos[0] < 430 and cursor_pos[1] < 185:
                     self.changing_controls = True
-                if cursor_pos[0] > 280 and cursor_pos[1] > 235 and cursor_pos[0] < 330 and cursor_pos[1] < 285:
+                    while self.changing_controls:
+                        self.outline_changing_controls('key for move left')
+                        pygame_keys = pygame.key.get_pressed()
+                        valid_keys = list(PYGAME_TO_KEYS.keys())
+                        for key in valid_keys:
+                            if pygame_keys[key]:
+                                self.left = key
+                                self.left_text = PYGAME_TO_KEYS[key]
+                                self.changing_controls = False
+                        self.handle_event_changing_controls()
+                if cursor_pos[0] > 280 and cursor_pos[1] > 235 and cursor_pos[0] < 430 and cursor_pos[1] < 285:
                     self.changing_controls = True
-                if cursor_pos[0] > 280 and cursor_pos[1] > 335 and cursor_pos[0] < 330 and cursor_pos[1] < 385:
+                    while self.changing_controls:
+                        self.outline_changing_controls('key for move right')
+                        pygame_keys = pygame.key.get_pressed()
+                        valid_keys = list(PYGAME_TO_KEYS.keys())
+                        for key in valid_keys:
+                            if pygame_keys[key]:
+                                self.right = key
+                                self.right_text = PYGAME_TO_KEYS[key]
+                                self.changing_controls = False
+                        self.handle_event_changing_controls()
+                if cursor_pos[0] > 280 and cursor_pos[1] > 335 and cursor_pos[0] < 430 and cursor_pos[1] < 385:
                     self.changing_controls = True
-                if cursor_pos[0] > 280 and cursor_pos[1] > 435 and cursor_pos[0] < 330 and cursor_pos[1] < 485:
+                    while self.changing_controls:
+                        self.outline_changing_controls('key for move down')
+                        pygame_keys = pygame.key.get_pressed()
+                        valid_keys = list(PYGAME_TO_KEYS.keys())
+                        for key in valid_keys:
+                            if pygame_keys[key]:
+                                self.down = key
+                                self.down_text = PYGAME_TO_KEYS[key]
+                                self.changing_controls = False
+                        self.handle_event_changing_controls()
+                if cursor_pos[0] > 280 and cursor_pos[1] > 435 and cursor_pos[0] < 430 and cursor_pos[1] < 485:
                     self.changing_controls = True
-                if cursor_pos[0] > 280 and cursor_pos[1] > 535 and cursor_pos[0] < 330 and cursor_pos[1] < 585:
+                    while self.changing_controls:
+                        self.outline_changing_controls('key for move rotate left')
+                        pygame_keys = pygame.key.get_pressed()
+                        valid_keys = list(PYGAME_TO_KEYS.keys())
+                        for key in valid_keys:
+                            if pygame_keys[key]:
+                                self.rotate_clockwise = key
+                                self.rotate_clockwise_text = PYGAME_TO_KEYS[key]
+                                self.changing_controls = False
+                        self.handle_event_changing_controls()
+                if cursor_pos[0] > 280 and cursor_pos[1] > 535 and cursor_pos[0] < 430 and cursor_pos[1] < 585:
                     self.changing_controls = True
+                    while self.changing_controls:
+                        self.outline_changing_controls('key for rotate right')
+                        pygame_keys = pygame.key.get_pressed()
+                        valid_keys = list(PYGAME_TO_KEYS.keys())
+                        for key in valid_keys:
+                            if pygame_keys[key]:
+                                self.rotate_anticlockwise = key
+                                self.rotate_anticlockwise_text = PYGAME_TO_KEYS[key]
+                                self.changing_controls = False
+                        self.handle_event_changing_controls()
     def handle_event_main_game(self):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if event.key == self.left:
                     if self.moving and self.moving_left:
                         continue
                     self.moving = True
@@ -898,7 +949,7 @@ class Game:
                         self.priority[0] = 1
                     else:
                         self.priority[0] = max(self.priority) + 1
-                if event.key == pygame.K_RIGHT:
+                if event.key == self.right:
                     if self.moving and self.moving_right:
                         continue
                     self.moving = True
@@ -908,7 +959,7 @@ class Game:
                         self.priority[2] = 1
                     else:
                         self.priority[2] = max(self.priority) + 1
-                if event.key == pygame.K_DOWN:
+                if event.key == self.down:
                     if self.moving and self.moving_down:
                         continue
                     self.moving_down = True
@@ -918,29 +969,29 @@ class Game:
                         self.priority[1] = 1
                     else:
                         self.priority[1] = max(self.priority) + 1
-                if event.key == pygame.K_a:
+                if event.key == self.rotate_anticlockwise:
                     self.rotating = True
                     self.rotate_direction = 'anti-clockwise'
-                if event.key == pygame.K_d:
+                if event.key == self.rotate_clockwise:
                     self.rotating = True
                     self.rotate_direction = 'clockwise'
             if event.type == pygame.KEYUP:
-                if event.key in [pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
-                    if event.key == pygame.K_DOWN:
+                if event.key in [self.down, self.left, self.right]:
+                    if event.key == self.down:
                         if self.priority[0] > self.priority[1]:
                             self.priority[0] -= 1
                         if self.priority[2] > self.priority[1]:
                             self.priority[2] -= 1
                         self.moving_down = False
                         self.priority[1] = 0
-                    if event.key == pygame.K_LEFT:
+                    if event.key == self.left:
                         if self.priority[1] > self.priority[0]:
                             self.priority[1] -= 1
                         if self.priority[2] > self.priority[0]:
                             self.priority[2] -= 1
                         self.moving_left = False
                         self.priority[0] = 0
-                    if event.key == pygame.K_RIGHT:
+                    if event.key == self.right:
                         if self.priority[0] > self.priority[2]:
                             self.priority[0] -= 1
                         if self.priority[1] > self.priority[2]:
@@ -988,14 +1039,67 @@ class Game:
                     self.clock = pygame.time.Clock()
                     self.block_drop_timer = 0
                     self.dt = 0 
-    def handle_event_changing_controls(self, control, control_to_text):
-        pygame_keys = pygame.key.get_pressed()
-        valid_keys = list(PYGAME_TO_KEYS.keys())
-        for key in valid_keys:
-            if pygame_keys[key]:
-                control = key
-                control_to_text = valid_keys[key]
+    def outline_changing_controls(self, control):
+        window.fill((128, 128, 128))
+        
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render(f'changing {control}', True, (255, 255, 255))
+        window.blit(img, (screen_width // 2 - img.get_width() // 2, 30))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 100)
+        font.set_bold(False)
+        img = font.render('press a key', True, (255, 255, 255))
+        window.blit(img, (screen_width // 2 - img.get_width() // 2, screen_height // 2 - img.get_height()))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 40)
+        font.set_bold(False)
+        img = font.render('accepted keys:', True, (255, 255, 255))
+        window.blit(img, (30, 430))
+        
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('all letters', True, (253, 63, 89))
+        window.blit(img, (300, 430))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('all numbers', True, (255, 145, 12))
+        window.blit(img, (300, 460))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('all arrow keys', True, (254, 251, 52))
+        window.blit(img, (300, 490))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('space', True, (83, 218, 63))
+        window.blit(img, (300, 520))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('left alt and right alt', True, (1, 237, 250))
+        window.blit(img, (300, 550))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('left shift and right shift', True, (0, 119, 211))
+        window.blit(img, (300, 580))
+
+        font = pygame.font.Font(('HunDIN1451.ttf'), 30)
+        font.set_bold(False)
+        img = font.render('enter and tab', True, (221, 10, 178))
+        window.blit(img, (300, 610))
+        pygame.display.update()
+
+    def handle_event_changing_controls(self):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
                 self.changing_controls = False
+                self.in_control_menu = False
+                self.running = False
 
     def update_cooldown(self):
         self.move_cooldown -= self.dt
@@ -1009,13 +1113,6 @@ class Game:
             while self.in_control_menu:
                 self.outline_controls()
                 self.handle_event_control_menu()
-                while self.changing_controls:
-                    font = pygame.font.Font(('HunDIN1451.ttf'), 20)
-                    font.set_bold(False)
-                    img = font.render('press any key', True, (255, 255, 255))
-                    window.blit(img, (screen_width // 2 - img.get_width() // 2, 455))
-                    pygame.display.update()
-                    self.handle_event_changing_controls()
 
         self.clock = pygame.time.Clock()
         window.fill((128, 128, 128))
